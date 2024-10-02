@@ -1,7 +1,8 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Audio } from "expo-av";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
-import { Button, Text, View } from "react-native";
+import { Button, StyleSheet, Text, View } from "react-native";
 import { RootStackParamList } from "../App";
 
 function useToggle(initialValue: boolean) {
@@ -43,11 +44,26 @@ export default function MeditationMusic() {
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <LinearGradient
+        // Background Linear Gradient
+        colors={["rgb(222,150,222)", "rgb(22,250,222)"]}
+        style={styles.background}
+      />
       <Text>Meditation Music</Text>
       <Button title={isPlaying ? "Stop" : "Play"} onPress={playSound} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  background: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+});
 
 //https://pixabay.com/sv/music/meditation-andlig-relaxing-meditation-231762/
 
