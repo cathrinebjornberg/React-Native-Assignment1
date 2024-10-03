@@ -1,34 +1,70 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Checkbox } from "expo-checkbox";
 import React, { useEffect, useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  Button,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 export default function ReflectionNotes() {
-  const [note, setNote] = useState("");
-  const [savedNote, setSavedNote] = useState("");
+  const [note, setNote] = useState<string>("");
+  const [savedNotes, setSavedNotes] = useState<string[]>([]);
+  const [selectedNotes, setSelectedNotes] = useState<Record<number, boolean>>(
+    {}
+  );
 
   useEffect(() => {
-    loadNote();
+    loadNotes();
   }, []);
 
   const saveNote = async () => {
+    if (note.trim() === "") {
+      Alert.alert("Please write a note before saving.");
+      return;
+    }
     try {
-      await AsyncStorage.setItem("userNote", note);
-      Alert.alert("Note saved successfully!");
-      setSavedNote(note);
+      const newNotes = [...savedNotes, note];
+      await AsyncStorage.setItem("userNotes", JSON.stringify(newNotes));
+      Alert.alert("Saved!");
+      setSavedNotes(newNotes);
+      setNote("");
     } catch (error) {
       Alert.alert("Failed to save note.");
     }
   };
 
-  const loadNote = async () => {
+  const loadNotes = async () => {
     try {
-      const storedNote = await AsyncStorage.getItem("userNote");
-      if (storedNote) {
-        setSavedNote(storedNote);
+      const storedNotes = await AsyncStorage.getItem("userNotes");
+      if (storedNotes) {
+        setSavedNotes(JSON.parse(storedNotes));
       }
     } catch (error) {
-      Alert.alert("Failed to load note.");
+      Alert.alert("Failed to load notes.");
     }
+  };
+
+  const deleteSelectedNotes = async () => {
+    const remainingNotes = savedNotes.filter(
+      (_, index) => !selectedNotes[index]
+    );
+    try {
+      await AsyncStorage.setItem("userNotes", JSON.stringify(remainingNotes));
+      setSavedNotes(remainingNotes);
+      setSelectedNotes({});
+      Alert.alert("Deleted!");
+    } catch (error) {
+      Alert.alert("Failed to delete notes.");
+    }
+  };
+
+  const hasSelectedNotes = () => {
+    return Object.values(selectedNotes).some((isSelected) => isSelected);
   };
 
   return (
@@ -43,12 +79,26 @@ export default function ReflectionNotes() {
       />
       <Button title="Save Note" onPress={saveNote} />
 
-      {savedNote ? (
-        <View style={styles.savedNoteContainer}>
-          <Text style={styles.savedNoteHeading}>Your Saved Note:</Text>
-          <Text style={styles.savedNote}>{savedNote}</Text>
-        </View>
-      ) : null}
+      <ScrollView style={styles.savedNotesContainer}>
+        {savedNotes.map((savedNote, index) => (
+          <View key={index} style={styles.noteContainer}>
+            <Checkbox
+              value={!!selectedNotes[index]}
+              onValueChange={() => {
+                setSelectedNotes((prev) => ({
+                  ...prev,
+                  [index]: !prev[index],
+                }));
+              }}
+            />
+            <Text style={styles.savedNote}>{savedNote}</Text>
+          </View>
+        ))}
+      </ScrollView>
+
+      {hasSelectedNotes() && (
+        <Button title="Delete Selected Notes" onPress={deleteSelectedNotes} />
+      )}
     </View>
   );
 }
@@ -73,15 +123,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlignVertical: "top",
   },
-  savedNoteContainer: {
+  savedNotesContainer: {
     marginTop: 20,
   },
-  savedNoteHeading: {
-    fontSize: 20,
-    fontWeight: "bold",
+  noteContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
   },
   savedNote: {
     fontSize: 16,
-    marginTop: 10,
+    marginLeft: 10,
   },
 });
