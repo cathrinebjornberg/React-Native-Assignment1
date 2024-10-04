@@ -40,7 +40,7 @@ Appen använder React Navigation för att navigera mellan olika skärmar och erb
 
 1. Klona projektet från GitHub:
 
-   git clone <Ditt-Repo-URL>
+   git clone <https://github.com/cathrinebjornberg/React-Native-Assignment1.git>
 
 2. Gå till projektmappen:
 
