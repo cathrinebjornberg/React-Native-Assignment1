@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Checkbox } from "expo-checkbox";
 import React, { useEffect, useState } from "react";
 import {
@@ -10,8 +11,17 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { RootStackParamList } from "../App";
 
-export default function ReflectionNotes() {
+type Props = NativeStackScreenProps<RootStackParamList, "ReflectionNotes">;
+
+export default function ReflectionNotes({ navigation }: Props) {
+  React.useEffect(() => {
+    navigation.setOptions({
+      headerTitle: "",
+    });
+  }, [navigation]);
+
   const [note, setNote] = useState<string>("");
   const [savedNotes, setSavedNotes] = useState<string[]>([]);
   const [selectedNotes, setSelectedNotes] = useState<Record<number, boolean>>(
@@ -24,17 +34,17 @@ export default function ReflectionNotes() {
 
   const saveNote = async () => {
     if (note.trim() === "") {
-      Alert.alert("Please write a note before saving.");
+      Alert.alert("Vänligen skriv en anteckning innan du sparar.");
       return;
     }
     try {
       const newNotes = [...savedNotes, note];
       await AsyncStorage.setItem("userNotes", JSON.stringify(newNotes));
-      Alert.alert("Saved!");
+      Alert.alert("Anteckning sparad!");
       setSavedNotes(newNotes);
       setNote("");
     } catch (error) {
-      Alert.alert("Failed to save note.");
+      Alert.alert("Misslyckades att spara.");
     }
   };
 
@@ -45,7 +55,7 @@ export default function ReflectionNotes() {
         setSavedNotes(JSON.parse(storedNotes));
       }
     } catch (error) {
-      Alert.alert("Failed to load notes.");
+      Alert.alert("Misslyckades att ladda anteckningar.");
     }
   };
 
@@ -57,9 +67,9 @@ export default function ReflectionNotes() {
       await AsyncStorage.setItem("userNotes", JSON.stringify(remainingNotes));
       setSavedNotes(remainingNotes);
       setSelectedNotes({});
-      Alert.alert("Deleted!");
+      Alert.alert("Anteckning raderad!");
     } catch (error) {
-      Alert.alert("Failed to delete notes.");
+      Alert.alert("Misslyckades att radera anteckningar.");
     }
   };
 
@@ -69,15 +79,15 @@ export default function ReflectionNotes() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Reflection Notes</Text>
+      <Text style={styles.heading}>Ny Anteckning</Text>
       <TextInput
         style={styles.input}
         multiline
-        placeholder="Write your reflection here..."
+        placeholder="Skriv här..."
         value={note}
         onChangeText={setNote}
       />
-      <Button title="Save Note" onPress={saveNote} />
+      <Button title="Spara" onPress={saveNote} />
 
       <ScrollView style={styles.savedNotesContainer}>
         {savedNotes.map((savedNote, index) => (
@@ -97,7 +107,7 @@ export default function ReflectionNotes() {
       </ScrollView>
 
       {hasSelectedNotes() && (
-        <Button title="Delete Selected Notes" onPress={deleteSelectedNotes} />
+        <Button title="Radera vald anteckning" onPress={deleteSelectedNotes} />
       )}
     </View>
   );

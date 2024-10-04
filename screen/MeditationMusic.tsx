@@ -13,9 +13,16 @@ function useToggle(initialValue: boolean) {
   };
   return { state, toggle, setState };
 }
+
 type Props = NativeStackScreenProps<RootStackParamList, "MeditationMusic">;
 
-export default function MeditationMusic() {
+export default function MeditationMusic({ navigation }: Props) {
+  React.useEffect(() => {
+    navigation.setOptions({
+      headerTitle: "Avslappnande musik",
+    });
+  }, [navigation]);
+
   const [sound, setSound] = useState<Audio.Sound>();
   const { state: isPlaying, setState: setIsPlaying, toggle } = useToggle(false);
 
@@ -42,17 +49,18 @@ export default function MeditationMusic() {
       Animated.sequence([
         Animated.timing(scaleValue, {
           toValue: 4,
-          duration: 4000,
+          duration: 6000,
           useNativeDriver: true,
         }),
         Animated.timing(scaleValue, {
           toValue: 1,
-          duration: 4000,
+          duration: 6000,
           useNativeDriver: true,
         }),
       ])
     ).start();
   };
+
   const stopAnimation = () => {
     scaleValue.setValue(1);
   };
@@ -75,7 +83,6 @@ export default function MeditationMusic() {
         ]}
       >
         <LinearGradient
-          // Background Linear Gradient
           colors={[
             "#FFB3BA",
             "#FFDFBA",
@@ -87,7 +94,7 @@ export default function MeditationMusic() {
           style={styles.background}
         />
       </Animated.View>
-      <Button title={isPlaying ? "Stop" : "Play"} onPress={playSound} />
+      <Button title={isPlaying ? "Stopp" : "Spela"} onPress={playSound} />
     </View>
   );
 }
@@ -108,7 +115,3 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
 });
-
-//https://pixabay.com/sv/music/meditation-andlig-relaxing-meditation-231762/
-
-//https://freemusicarchive.org/music/kirk-osamayo/season-two-yellow/meditation-on-love/

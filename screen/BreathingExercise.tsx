@@ -7,19 +7,27 @@ import { RootStackParamList } from "../App";
 type Props = NativeStackScreenProps<RootStackParamList, "BreathingExercise">;
 
 export default function BreathingExercise({ navigation }: Props) {
+  React.useEffect(() => {
+    navigation.setOptions({
+      headerTitle: "Lär dig att andas rätt",
+    });
+  }, [navigation]);
+
   const animation = useRef(new Animated.Value(1)).current;
   const [breathPhase, setBreathPhase] = useState("Andas in");
   const [isRunning, setIsRunning] = useState(false);
+  const [showTips, setShowTips] = useState(true);
 
   const breathTimes = {
     inhale: 4000,
     holdInhale: 4000,
-    exhale: 6000,
+    exhale: 7000,
     holdExhale: 2000,
   };
 
   useEffect(() => {
     if (isRunning) {
+      setShowTips(false);
       const phases = ["Andas in", "Håll andan", "Andas ut", "Håll andan"];
       let cycleIndex = 0;
 
@@ -104,32 +112,63 @@ export default function BreathingExercise({ navigation }: Props) {
     outputRange: [100, 200],
   });
 
+  const tips = [
+    "Denna övning hjälper dig att hitta rätt andningsteknik när du mediterar.",
+    "Övningen kan ha lindrande effekt vid stress och ångestsymtom.",
+    "Andas in genom näsan långsamt tills bollen stannar.",
+    "Tänk på att spänna ut magen vid varje nytt andetag.",
+    "Håll andan när bollen är stilla.",
+    "Andas ut genom munnen långsammare än vid inandningen.",
+    "Öva i minst 5 minuter.",
+  ];
+
   return (
     <View style={styles.container}>
+      {showTips && (
+        <View style={styles.tipsContainer}>
+          {tips.map((tip, index) => (
+            <Text key={index} style={styles.tipsText}>
+              • {tip}
+            </Text>
+          ))}
+        </View>
+      )}
       <Text style={styles.breathText}>{breathPhase}</Text>
       <Animated.View
         style={[styles.ball, { width: ballSize, height: ballSize }]}
       />
       <Button
-        title={isRunning ? "Stop" : "Start"}
+        title={isRunning ? "Stopp" : "Start"}
         onPress={() => setIsRunning(!isRunning)}
       />
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingTop: 50,
   },
   ball: {
     backgroundColor: "lightblue",
     borderRadius: 100,
+    marginBottom: 10,
   },
   breathText: {
     fontSize: 24,
-    marginBottom: 50,
+    marginBottom: 10,
+  },
+  tipsContainer: {
+    position: "absolute",
+    top: 10,
+    marginBottom: 20,
+    alignItems: "flex-start",
+  },
+  tipsText: {
+    fontSize: 18,
+    color: "gray",
+    marginBottom: 5,
   },
 });
